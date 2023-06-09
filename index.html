@@ -6,7 +6,7 @@
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Simple Chat</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <link rel='stylesheet' type='text/css'  href='style.css'>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
     <script src="/socket.io/socket.io.js"></script>
 </head>
@@ -22,9 +22,9 @@
             </form>
         </div>
         <div v-if="state==1">
-            <ul>
-                <li v-for="message in messages">
-                    {{message}}
+            <ul >
+                <li v-for="message in getLastHundredMessages">
+                    <b >{{message.user}}:</b> {{message.message}}
                 </li>
             </ul>
 
@@ -42,7 +42,7 @@
             {
                 el: '#app',
                 data: {
-                    message: 'hello',
+                    message: '',
                     messages: [],
                     username: '',
                     state: 0,
@@ -54,6 +54,7 @@
                     socket.on('message', function (message) {
                         app.messages.push(message);
                     });
+                    
                 },
                 methods: {
                     sendMessage: function () {
@@ -62,8 +63,15 @@
                     },
                     setUserName: function () {
                         socket.emit('join', this.username);
-                        this.username='';
-                        this.state=1;
+                        this.username = '';
+                        this.state = 1;
+                    },
+                   
+                },
+                computed: {
+                    /* We return  last 100 message*/
+                    getLastHundredMessages: function (){
+                        return this.messages.slice(-100);
                     }
                 }
             }
