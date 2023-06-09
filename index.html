@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Simple Chat</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <h1>Simple Chat</h1>
+    <div id="app">
+        <div v-if="state==0">
+            <h3>Please choose an username</h3>
+            <form @submit.prevent="setUserName">
+                <input type="text" placeholder="username..." v-model="username">
+                <input type="submit" value="join">
+            </form>
+        </div>
+        <div v-if="state==1">
+            <ul>
+                <li v-for="message in messages">
+                    {{message}}
+                </li>
+            </ul>
+
+            <form @submit.prevent="sendMessage">
+                <input type="text" v-model:value="message" />
+                <input type="submit" value="send">
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        var socket = io();
+        var app = new Vue(
+            {
+                el: '#app',
+                data: {
+                    message: 'hello',
+                    messages: [],
+                    username: '',
+                    state: 0,
+                },
+                created: function () {
+                    socket = io();
+                },
+                mounted: function () {
+                    socket.on('message', function (message) {
+                        app.messages.push(message);
+                    });
+                },
+                methods: {
+                    sendMessage: function () {
+                        socket.emit('message', this.message);
+                        this.message = '';
+                    },
+                    setUserName: function () {
+                        socket.emit('join', this.username);
+                        this.username='';
+                        this.state=1;
+                    }
+                }
+            }
+        )
+
+    </script>
+</body>
+
+</html>
